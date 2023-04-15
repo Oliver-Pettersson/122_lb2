@@ -16,10 +16,11 @@ const readDirectoryRecursive = (directory: string): DirectoryStructure => {
     const stat = fs.statSync(itemPath);
 
     if (stat.isDirectory()) {
+      const dir = readDirectoryRecursive(itemPath)
       const subfolder = {
         name: item,
-        files: [],
-        subfolders: readDirectoryRecursive(itemPath).subfolders,
+        files: dir.files,
+        subfolders: dir.subfolders,
       };
       subfolders.push(subfolder);
     } else {
