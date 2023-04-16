@@ -5,13 +5,20 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TreeItem from "@mui/lab/TreeItem";
 import { useData } from "../../../contexts/DataContext";
 import Node from "../../../models/Node/Node";
+import FolderIcon from "@mui/icons-material/Folder";
+import DescriptionIcon from "@mui/icons-material/Description";
 
 export default function FileTree() {
-  const { setSelectedNode, nodes } = useData();
+  const { setSelectedNode, nodes, selectedNode } = useData();
 
   const loadSubnodes = (node: Node) =>
     node.subnodes.map((subnode) => (
-      <TreeItem key={subnode.path} nodeId={subnode.path} label={subnode.label}>
+      <TreeItem
+        icon={subnode.type === "folder" ? <FolderIcon /> : <DescriptionIcon />}
+        key={subnode.path}
+        nodeId={subnode.path}
+        label={subnode.label}
+      >
         {loadSubnodes(subnode)}
       </TreeItem>
     ));
@@ -21,7 +28,10 @@ export default function FileTree() {
       aria-label="file system navigator"
       defaultCollapseIcon={<ExpandMoreIcon />}
       defaultExpandIcon={<ChevronRightIcon />}
-      onNodeSelect={(event: any, nodeId: string) => setSelectedNode(nodeId)}
+      selected={selectedNode || ""}
+      onNodeSelect={(event: any, nodeId: string) =>
+        selectedNode === nodeId ? setSelectedNode("") : setSelectedNode(nodeId)
+      }
       sx={{
         height: 240,
         flexGrow: 1,
@@ -31,7 +41,12 @@ export default function FileTree() {
       }}
     >
       {nodes.map((node) => (
-        <TreeItem key={node.path} nodeId={node.path} label={node.label}>
+        <TreeItem
+          icon={node.type === "folder" ? <FolderIcon /> : <DescriptionIcon />}
+          key={node.path}
+          nodeId={node.path}
+          label={node.label}
+        >
           {loadSubnodes(node)}
         </TreeItem>
       ))}

@@ -18,6 +18,7 @@ export type DataContextProps = {
   nodes: Node[];
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   setSelectedNode: React.Dispatch<React.SetStateAction<string>>;
+  reloadNodes: () => void;
 };
 
 const DataContext = createContext<DataContextProps>({} as DataContextProps);
@@ -25,18 +26,8 @@ const DataContext = createContext<DataContextProps>({} as DataContextProps);
 export const useData = () => useContext(DataContext);
 
 export const DataContextProvider = ({ children }: DataProviderProps) => {
-  const [selectedNode, setSelectedNode] = useState("");
+  const [selectedNode, setSelectedNode] = useState<string>("");
   const [nodes, setNodes] = useState<Node[]>([]);
-
-  const passedValue = useMemo(
-    () => ({
-      selectedNode: selectedNode,
-      setSelectedNode: setSelectedNode,
-      nodes: nodes,
-      setNodes: setNodes,
-    }),
-    [nodes, selectedNode]
-  );
 
   const loadNodesFromDirectory = (
     directory: DirectoryStructure,
@@ -44,9 +35,14 @@ export const DataContextProvider = ({ children }: DataProviderProps) => {
   ): Node[] => {
     const tempNodes: Node[] = [];
     tempNodes.push(
-      ...directory.files.map((fileName) => {
-        return { label: fileName, path: pathPrefix + fileName, subnodes: [] };
-      })
+      ...directory.files.map(
+        (fileName): Node => ({
+          label: fileName,
+          path: pathPrefix + fileName,
+          subnodes: [],
+          type: "file",
+        })
+      )
     );
     directory.subfolders.map((subfolder) =>
       tempNodes.push({
@@ -56,18 +52,33 @@ export const DataContextProvider = ({ children }: DataProviderProps) => {
           subfolder,
           pathPrefix + subfolder.name + "/"
         ),
+        type: "folder",
       })
     );
     return tempNodes;
   };
 
-  useEffect(() => {
+  const reloadNodes = () => {
     const tempNodes = loadNodesFromDirectory(loadRootDirectory(), "");
     console.log(tempNodes);
 
     setNodes(tempNodes);
+  }
+
+  useEffect(() => {
+    reloadNodes()
   }, []);
 
+  const passedValue = useMemo(
+    () => ({
+      selectedNode: selectedNode,
+      setSelectedNode: setSelectedNode,
+      nodes: nodes,
+      setNodes: setNodes,
+      reloadNodes: reloadNodes
+    }),
+    [nodes, selectedNode]
+  );
   return (
     <DataContext.Provider value={passedValue}>{children}</DataContext.Provider>
   );
