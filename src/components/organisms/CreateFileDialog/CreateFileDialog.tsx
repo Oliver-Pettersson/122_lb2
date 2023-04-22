@@ -1,8 +1,16 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
 import { Form, Formik } from "formik";
 import React from "react";
 import { createFile } from "../../../utils/FileHandler";
 import { useData } from "../../../contexts/DataContext";
+import { useSnackbar } from "../../../contexts/SnackbarContext";
 
 interface PropsType {
   open: boolean;
@@ -10,32 +18,60 @@ interface PropsType {
 }
 
 export default function CreateFileDialog({ open, setOpen }: PropsType) {
-  const {selectedNode, reloadNodes} = useData()
+  const { selectedNode, reloadNodes, findNode } = useData();
+  const { displaySnackbarMessage } = useSnackbar();
   return (
     <Dialog open={open} fullWidth maxWidth="sm">
-        <div style={{minWidth: "100%"}}>
-      <Formik
-        initialValues={{ name: ""}}
-        onSubmit={(values) => {
-          console.log(values);
-            createFile(values.name, selectedNode)
-            reloadNodes()
-            setOpen(false)
-        }}
-      >
-        {({ handleChange }) => (
-          <Form style={{minWidth: "100%"}}>
-            <DialogTitle>Create File</DialogTitle>
-            <DialogContent sx={{minWidth: "60%"}}>
-              <TextField label="Name" fullWidth onChange={handleChange} name="name"/>
-            </DialogContent>
-            <DialogActions>
-              <Button color="error" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button type="submit">Submit</Button>
-            </DialogActions>
-          </Form>
-        )}
-      </Formik>
+      <div style={{ minWidth: "100%" }}>
+        <Formik
+          initialValues={{ name: "" }}
+          onSubmit={(values) => {
+            try {
+              if (values.name === "") {
+                throw new Error("Empty file name");
+              }
+              if (findNode(selectedNode).type === "folder") {
+                createFile(values.name, selectedNode);
+              } else {
+                const indexOfSlash = selectedNode.lastIndexOf("/");
+                const parentFolder = selectedNode.substring(
+                  0,
+                  indexOfSlash === -1 ? 0 : indexOfSlash
+                );
+                createFile(values.name, parentFolder);
+              }
+              displaySnackbarMessage("Created file", "success");
+            } catch (error) {
+              displaySnackbarMessage(
+                "Can't create file, make sure the name is valid/not taken",
+                "error"
+              );
+            }
+            reloadNodes();
+            setOpen(false);
+          }}
+        >
+          {({ handleChange }) => (
+            <Form style={{ minWidth: "100%" }}>
+              <DialogTitle>Create File</DialogTitle>
+              <DialogContent sx={{ minWidth: "60%" }}>
+                <TextField
+                  label="Name"
+                  fullWidth
+                  sx={{ marginTop: 1 }}
+                  onChange={handleChange}
+                  name="name"
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button color="error" onClick={() => setOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Submit</Button>
+              </DialogActions>
+            </Form>
+          )}
+        </Formik>
       </div>
     </Dialog>
   );

@@ -1,13 +1,28 @@
 import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
-import Main from "./components/pages/Main/Main";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import FileEditor from "./components/organisms/FileEditor/FileEditor";
+import FileNavigation from "./components/organisms/FileNavigation/FileNavigation";
+import { DataContextProvider } from "./contexts/DataContext";
+import { SnackbarContextProvider } from "./contexts/SnackbarContext";
 
 function App() {
+  const myTheme = createTheme({});
   return (
-    <>
-      <Main />
-    </>
+    <ThemeProvider theme={myTheme}>
+      <DataContextProvider>
+        <SnackbarContextProvider>
+          <div style={{ display: "flex", padding: 10 }}>
+            <div style={{ maxWidth: "50%", flexGrow: 1, display: "flex", flexFlow: "column"}}>
+              <FileNavigation />
+            </div>
+            <div style={{ maxWidth: "50%", marginTop: 6 }}>
+              <FileEditor />
+            </div>
+          </div>
+        </SnackbarContextProvider>
+      </DataContextProvider>
+    </ThemeProvider>
   );
 }
 

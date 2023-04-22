@@ -9,8 +9,8 @@ import FolderIcon from "@mui/icons-material/Folder";
 import DescriptionIcon from "@mui/icons-material/Description";
 
 export default function FileTree() {
-  const { setSelectedNode, nodes, selectedNode } = useData();
-
+  const { setSelectedNode, filteredNodes, selectedNode } = useData();
+  
   const loadSubnodes = (node: Node) =>
     node.subnodes.map((subnode) => (
       <TreeItem
@@ -33,14 +33,13 @@ export default function FileTree() {
         selectedNode === nodeId ? setSelectedNode("") : setSelectedNode(nodeId)
       }
       sx={{
-        height: 240,
         flexGrow: 1,
-        maxWidth: "50%",
+        backgroundColor: "#EEEEEE",
         overflowY: "auto",
         overflowX: "hidden",
       }}
     >
-      {nodes.map((node) => (
+      {filteredNodes.map((node) => (
         <TreeItem
           icon={node.type === "folder" ? <FolderIcon /> : <DescriptionIcon />}
           key={node.path}

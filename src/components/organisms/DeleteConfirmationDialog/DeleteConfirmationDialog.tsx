@@ -10,6 +10,7 @@ import { Form, Formik } from "formik";
 import React from "react";
 import { useData } from "../../../contexts/DataContext";
 import { deleteData } from "../../../utils/FileHandler";
+import { useSnackbar } from "../../../contexts/SnackbarContext";
 
 interface PropsType {
   open: boolean;
@@ -18,6 +19,7 @@ interface PropsType {
 
 export default function DeleteConfirmationDialog({ open, setOpen }: PropsType) {
   const { selectedNode, reloadNodes } = useData();
+  const {displaySnackbarMessage} = useSnackbar()
   return (
     <Dialog open={open} fullWidth maxWidth="sm">
       <DialogTitle>
@@ -32,6 +34,7 @@ export default function DeleteConfirmationDialog({ open, setOpen }: PropsType) {
           onClick={() => {
             deleteData(selectedNode);
             reloadNodes()
+            displaySnackbarMessage("Deleted node", "success")
             setOpen(false)
           }}
         >
